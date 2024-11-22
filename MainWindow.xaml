@@ -6,7 +6,15 @@
         xmlns:local="clr-namespace:Kinderspiel"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-
+    <Grid Background="LightBlue">
+        <!-- Anzeigefläche für das Bild -->
+        <Ellipse Name="green" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50" Height="50" Fill="Green" MouseLeftButtonDown="click" />
+        <Ellipse Name="red" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50" Height="50" Fill="Red" MouseLeftButtonDown="click" />
+        <Ellipse Name="blue" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50" Height="50" Fill="Blue" MouseLeftButtonDown="click" />
+        <Ellipse Name="purple" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50" Height="50" Fill="Purple" MouseLeftButtonDown="click" />
+        <Ellipse Name="orange" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50" Height="50" Fill="Orange" MouseLeftButtonDown="click" />
+        <!-- Infoanzeigen -->
+        <TextBlock Name="Punktestand" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="24" Foreground="Black" Margin="-200,20,0,0" />
+        <TextBlock Name="ColorInfo" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="24" Foreground="Black" Margin="200,20,0,0" />
     </Grid>
 </Window>
