@@ -7,8 +7,10 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Kinderspiel
@@ -18,25 +20,31 @@ namespace Kinderspiel
     /// </summary>
     public partial class MainWindow : Window
     {
-        private int punkte = 0;
+        private int points = 0;
         private Random random = new Random();
         
-        private List<Ellipse> images = new List<Ellipse>();
+        private List<Ellipse> targets = new List<Ellipse>();
+        private Dictionary<Ellipse, Tuple<double, double>> directions = new Dictionary<Ellipse, Tuple<double, double>>();
         private Ellipse selectedTarget;
-
 
         public MainWindow()
         {
             InitializeComponent();
-            images.Add(red);
-            images.Add(green);
-            images.Add(blue);
-            images.Add(purple);
-            images.Add(orange);
+            init(red);
+            init(green);
+            init(blue);
+            init(purple);
+            init(orange);
             Update();
+            StartBackgroundMovement();
         }
 
-        // Methode zum Bewegen des Bildes
+        private void init(Ellipse ellipse)
+        {
+            targets.Add(ellipse);
+            directions.Add(ellipse, new Tuple<double, double>(1,1));
+        }
+
         private Thickness MoveTarget(Ellipse ellipse)
         {
             int HeadLine = 40;
@@ -45,10 +53,10 @@ namespace Kinderspiel
             return new Thickness(x,y,0,0);
         }
 
-        private void MoveTargets()
+        private void MoveTargets_OLD()
         {
             List<Thickness> currentPositions = new List<Thickness>();
-            foreach (Ellipse ellipse in images)
+            foreach (Ellipse ellipse in targets)
             {
                 Thickness thickness = MoveTarget(ellipse);
                 Boolean Overlaping = true;
@@ -57,19 +65,64 @@ namespace Kinderspiel
                     Overlaping = false;
                     foreach (Thickness t in currentPositions)
                     {
-                        if (IsOverlaping(thickness, t, 40))
+                        if (IsOverlaping(thickness, t, 45))
                         {
                             Overlaping = true;
                         }
                     }
                     if (Overlaping)
                     {
-                        thickness.Top = (thickness.Top + 10) % (this.Height - 85);
-                        thickness.Left = (thickness.Left + 10) % (this.Width - 85);
+                        thickness.Top = (thickness.Top + 10) % (this.Height - 80);
+                        thickness.Left = (thickness.Left + 10) % (this.Width - 80);
                     }
                 }
                 ellipse.Margin = thickness;
                 currentPositions.Add(thickness);
+            }
+        }
+        private void MoveTargets()
+        {
+            foreach (Ellipse ellipse in targets)
+            {
+                ellipse.Margin = MoveTarget(ellipse);
+                double n = (points + 1) * .3;
+                directions[ellipse] = (new Tuple<double, double>(random.Next(3, (int)(100 * n)) / 100d, random.Next(3, (int)(100 * n)) / 100d));
+            }
+        }
+
+        private async void StartBackgroundMovement()
+        {
+            while (true)
+            {
+                foreach (Ellipse ellipse in targets)
+                {
+
+                    Thickness t = ellipse.Margin;
+                    Tuple<double, double> direction = directions[ellipse];
+                    double dx = direction.Item1;
+                    double dy = direction.Item2;
+                    double xPosition = t.Left;
+                    double yPosition = t.Top;
+
+                    xPosition += dx * 2;
+                    yPosition += dy * 2;
+
+                    if (xPosition >= this.Width - 80 || xPosition <= 0)
+                    {
+                        dx *= -1;
+                    }
+                    if (yPosition >= this.Height - 80 || yPosition <= 45)
+                    {
+                        dy *= -1;
+                    }
+
+                    directions[ellipse] = new Tuple<double, double>(dx, dy);
+                    t.Left = xPosition;
+                    t.Top = yPosition;
+                    ellipse.Margin = t;
+                }
+
+                await Task.Delay(16);
             }
         }
 
@@ -86,7 +139,6 @@ namespace Kinderspiel
         }
 
 
-        // Event, wenn das Bild angeklickt wird
         private void click(object sender, MouseButtonEventArgs e)
         {
             if (!(sender is UIElement))
@@ -98,7 +150,7 @@ namespace Kinderspiel
             {
                 if (ellipse == selectedTarget)
                 {
-                    punkte++;
+                    points++;
                     Update();
                 } else
                 {
@@ -109,13 +161,13 @@ namespace Kinderspiel
 
         public void chooseNewTarget()
         {
-            selectedTarget = images[random.Next(0, images.Count)];
+            selectedTarget = targets[random.Next(0, targets.Count)];
             ColorInfo.Text = ColorName;
         }
 
         private void UpdatePunktestand()
         {
-            Punktestand.Text = $"Punkte: {punkte}";
+            Punktestand.Text = $"Punkte: {points}";
         }
 
         public string ColorName
