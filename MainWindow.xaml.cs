@@ -1,5 +1,6 @@
 ﻿using System.Printing;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -23,9 +24,8 @@ namespace Kinderspiel
         private int points = 0;
         private Random random = new Random();
         
-        private List<Ellipse> targets = new List<Ellipse>();
-        private Dictionary<Ellipse, Tuple<double, double>> directions = new Dictionary<Ellipse, Tuple<double, double>>();
-        private Ellipse selectedTarget;
+        private List<Circle> targets = new List<Circle>();
+        private Circle selectedTarget;
 
         public MainWindow()
         {
@@ -34,106 +34,32 @@ namespace Kinderspiel
             init(green);
             init(blue);
             init(purple);
-            init(orange);
+            init(yellow);
             Update();
-            StartBackgroundMovement();
+            StartMovement();
         }
 
         private void init(Ellipse ellipse)
         {
-            targets.Add(ellipse);
-            directions.Add(ellipse, new Tuple<double, double>(1,1));
+            targets.Add(new Circle(this, ellipse));
         }
 
-        private Thickness MoveTarget(Ellipse ellipse)
-        {
-            int HeadLine = 40;
-            double x = random.Next(0, (int)(this.Width - ellipse.Width - 35));
-            double y = random.Next(HeadLine, (int)(this.Height - ellipse.Height - 35));
-            return new Thickness(x,y,0,0);
-        }
-
-        private void MoveTargets_OLD()
-        {
-            List<Thickness> currentPositions = new List<Thickness>();
-            foreach (Ellipse ellipse in targets)
-            {
-                Thickness thickness = MoveTarget(ellipse);
-                Boolean Overlaping = true;
-                while (Overlaping)
+        private async void StartMovement()
+         {
+             while (true)
+             {
+                foreach (Circle circle in targets)
                 {
-                    Overlaping = false;
-                    foreach (Thickness t in currentPositions)
-                    {
-                        if (IsOverlaping(thickness, t, 45))
-                        {
-                            Overlaping = true;
-                        }
-                    }
-                    if (Overlaping)
-                    {
-                        thickness.Top = (thickness.Top + 10) % (this.Height - 80);
-                        thickness.Left = (thickness.Left + 10) % (this.Width - 80);
-                    }
-                }
-                ellipse.Margin = thickness;
-                currentPositions.Add(thickness);
-            }
-        }
-        private void MoveTargets()
-        {
-            foreach (Ellipse ellipse in targets)
-            {
-                ellipse.Margin = MoveTarget(ellipse);
-                double n = (points + 1) * .3;
-                directions[ellipse] = (new Tuple<double, double>(random.Next(3, (int)(100 * n)) / 100d, random.Next(3, (int)(100 * n)) / 100d));
-            }
-        }
-
-        private async void StartBackgroundMovement()
-        {
-            while (true)
-            {
-                foreach (Ellipse ellipse in targets)
-                {
-
-                    Thickness t = ellipse.Margin;
-                    Tuple<double, double> direction = directions[ellipse];
-                    double dx = direction.Item1;
-                    double dy = direction.Item2;
-                    double xPosition = t.Left;
-                    double yPosition = t.Top;
-
-                    xPosition += dx * 2;
-                    yPosition += dy * 2;
-
-                    if (xPosition >= this.Width - 80 || xPosition <= 0)
-                    {
-                        dx *= -1;
-                    }
-                    if (yPosition >= this.Height - 80 || yPosition <= 45)
-                    {
-                        dy *= -1;
-                    }
-
-                    directions[ellipse] = new Tuple<double, double>(dx, dy);
-                    t.Left = xPosition;
-                    t.Top = yPosition;
-                    ellipse.Margin = t;
+                    circle.Tick(targets);
                 }
 
-                await Task.Delay(16);
-            }
-        }
-
-        private Boolean IsOverlaping(Thickness a, Thickness b, int size)
-        {
-            return a.Top - b.Top < size && a.Left - b.Left < size;
-        }
+                 await Task.Delay(16);
+             }
+         }
 
         private void Update()
         {
-            MoveTargets();
+            //MoveTargets();
             UpdatePunktestand();
             chooseNewTarget();
         }
@@ -141,6 +67,7 @@ namespace Kinderspiel
 
         private void click(object sender, MouseButtonEventArgs e)
         {
+            if (selectedTarget == null) return;
             if (!(sender is UIElement))
             {
                 return;
@@ -148,7 +75,7 @@ namespace Kinderspiel
             UIElement uiElement = (UIElement) sender;
             if (sender is Ellipse ellipse)
             {
-                if (ellipse == selectedTarget)
+                if (ellipse == selectedTarget.GetEllipse())
                 {
                     points++;
                     Update();
@@ -163,6 +90,7 @@ namespace Kinderspiel
         {
             selectedTarget = targets[random.Next(0, targets.Count)];
             ColorInfo.Text = ColorName;
+            ColorInfo.Foreground = selectedTarget.GetEllipse().Fill;
         }
 
         private void UpdatePunktestand()
@@ -173,29 +101,29 @@ namespace Kinderspiel
         public string ColorName
         {
             get {
-                string text = "Wo ist die Farbe: ";
-                if (selectedTarget == null)
+                string text = "";
+                if (selectedTarget != null)
                 {
-                    return "";
-                }
-                if (selectedTarget.Name.Equals("red"))
-                {
-                    text += "Rot";
-                }
-                else if(selectedTarget.Name.Equals("green"))
-                {
-                    text += "Grün";
-                }
-                else if(selectedTarget.Name.Equals("blue"))
-                {
-                    text += "Blau";
-                }
-                else if(selectedTarget.Name.Equals("purple"))
-                {
-                    text += "Lila";
-                } else if (selectedTarget.Name.Equals("orange"))
-                {
-                    text += "Orange";
+                    if (selectedTarget.GetEllipse().Name.Equals("red"))
+                    {
+                        text += "Rot";
+                    }
+                    else if (selectedTarget.GetEllipse().Name.Equals("green"))
+                    {
+                        text += "Grün";
+                    }
+                    else if (selectedTarget.GetEllipse().Name.Equals("blue"))
+                    {
+                        text += "Blau";
+                    }
+                    else if (selectedTarget.GetEllipse().Name.Equals("purple"))
+                    {
+                        text += "Lila";
+                    }
+                    else if (selectedTarget.GetEllipse().Name.Equals("yellow"))
+                    {
+                        text += "Gelb";
+                    }
                 }
                 return text;
             }
