@@ -30,40 +30,42 @@ namespace Kinderspiel
         public MainWindow()
         {
             InitializeComponent();
-            init(red);
-            init(green);
-            init(blue);
-            init(purple);
-            init(yellow);
+            InitEllipse(red, 50, 50);
+            InitEllipse(green, 120, 50);
+            InitEllipse(blue, 200, 50);
+            InitEllipse(purple, 100, 200);
+            InitEllipse(yellow, 200, 200);
             Update();
             StartMovement();
         }
 
-        private void init(Ellipse ellipse)
+        private void InitEllipse(Ellipse ellipse, double x, double y)
         {
-            targets.Add(new Circle(this, ellipse));
+            targets.Add(new Circle(this, ellipse, x, y));
         }
 
         private async void StartMovement()
          {
              while (true)
-             {
+            {
                 foreach (Circle circle in targets)
                 {
                     circle.Tick(targets);
                 }
+                foreach (Circle circle in targets)
+                {
+                    circle.Update();
+                }
 
-                 await Task.Delay(16);
+                await Task.Delay(16);
              }
          }
 
         private void Update()
         {
-            //MoveTargets();
             UpdatePunktestand();
             chooseNewTarget();
         }
-
 
         private void click(object sender, MouseButtonEventArgs e)
         {
@@ -75,7 +77,20 @@ namespace Kinderspiel
             UIElement uiElement = (UIElement) sender;
             if (sender is Ellipse ellipse)
             {
-                if (ellipse == selectedTarget.GetEllipse())
+                Circle circle = null;
+                foreach (Circle circle1 in targets)
+                {
+                    if (circle1.GetEllipse() == ellipse)
+                    {
+                        circle = circle1; break;
+                    }
+                }
+                if (circle == null)
+                {
+                    return;
+                }
+
+                if (circle.Name().Equals(selectedTarget.Name()))
                 {
                     points++;
                     Update();
@@ -104,23 +119,23 @@ namespace Kinderspiel
                 string text = "";
                 if (selectedTarget != null)
                 {
-                    if (selectedTarget.GetEllipse().Name.Equals("red"))
+                    if (selectedTarget.Name().Equals("red"))
                     {
                         text += "Rot";
                     }
-                    else if (selectedTarget.GetEllipse().Name.Equals("green"))
+                    else if (selectedTarget.Name().Equals("green"))
                     {
                         text += "Grün";
                     }
-                    else if (selectedTarget.GetEllipse().Name.Equals("blue"))
+                    else if (selectedTarget.Name().Equals("blue"))
                     {
                         text += "Blau";
                     }
-                    else if (selectedTarget.GetEllipse().Name.Equals("purple"))
+                    else if (selectedTarget.Name().Equals("purple"))
                     {
                         text += "Lila";
                     }
-                    else if (selectedTarget.GetEllipse().Name.Equals("yellow"))
+                    else if (selectedTarget.Name().Equals("yellow"))
                     {
                         text += "Gelb";
                     }
