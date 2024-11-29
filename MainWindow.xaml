@@ -6,15 +6,18 @@
         xmlns:local="clr-namespace:Kinderspiel"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid Background="LightBlue">
+    <Grid Background="CadetBlue">
         <!-- Anzeigefläche für das Bild -->
-        <Ellipse Name="green" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50" Height="50" Fill="Green" MouseLeftButtonDown="click" />
-        <Ellipse Name="red" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50" Height="50" Fill="Red" MouseLeftButtonDown="click" />
-        <Ellipse Name="blue" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50" Height="50" Fill="Blue" MouseLeftButtonDown="click" />
-        <Ellipse Name="purple" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50" Height="50" Fill="Purple" MouseLeftButtonDown="click" />
-        <Ellipse Name="orange" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50" Height="50" Fill="Orange" MouseLeftButtonDown="click" />
+        <Ellipse Name="circle1" HorizontalAlignment="Left" VerticalAlignment="Top" MouseLeftButtonDown="click" />
+        <Ellipse Name="circle2" HorizontalAlignment="Left" VerticalAlignment="Top" MouseLeftButtonDown="click" />
+        <Ellipse Name="circle3" HorizontalAlignment="Left" VerticalAlignment="Top" MouseLeftButtonDown="click" />
+        <Ellipse Name="circle4" HorizontalAlignment="Left" VerticalAlignment="Top" MouseLeftButtonDown="click" />
+        <Ellipse Name="circle5" HorizontalAlignment="Left" VerticalAlignment="Top" MouseLeftButtonDown="click" />
         <!-- Infoanzeigen -->
         <TextBlock Name="Punktestand" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="24" Foreground="Black" Margin="-200,20,0,0" />
-        <TextBlock Name="ColorInfo" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="24" Foreground="Black" Margin="200,20,0,0" />
+        <TextBlock Text="Wo ist die Farbe:" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="24" Foreground="Black" Margin="200,20,0,0" />
+        <TextBlock Name="ColorInfo" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="24" Foreground="Black" Margin="590,20,0,0" />
+
+        <!--<Rectangle Height="2" Width="200" Fill="Black" Margin="10,40,10,380"/>-->
     </Grid>
 </Window>
