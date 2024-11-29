@@ -25,23 +25,32 @@ namespace Kinderspiel
         private Random random = new Random();
         
         private List<Circle> targets = new List<Circle>();
-        private Circle selectedTarget;
+        private string selectedTarget;
 
         public MainWindow()
         {
             InitializeComponent();
-            InitEllipse(red, 50, 50);
-            InitEllipse(green, 120, 50);
-            InitEllipse(blue, 200, 50);
-            InitEllipse(purple, 100, 200);
-            InitEllipse(yellow, 200, 200);
+            int i = 0;
+
+            InitEllipse(circle1, i++);
+            InitEllipse(circle2, i++);
+            InitEllipse(circle3, i++);
+            InitEllipse(circle4, i++);
+            InitEllipse(circle5, i++);
             Update();
             StartMovement();
         }
 
-        private void InitEllipse(Ellipse ellipse, double x, double y)
+        private Circle InitEllipse(Ellipse ellipse, int i)
         {
-            targets.Add(new Circle(this, ellipse, x, y));
+            List<string> colors = new List<string>(Circle.hexColors.Keys);
+
+            Random random = new Random();
+            Circle circle = new Circle(this, ellipse, (Width / (colors.Count + 1)) * i, random.Next(80, 200));
+            circle.Name = colors[i % colors.Count];
+
+            targets.Add(circle);
+            return circle;
         }
 
         private async void StartMovement()
@@ -90,7 +99,7 @@ namespace Kinderspiel
                     return;
                 }
 
-                if (circle.Name().Equals(selectedTarget.Name()))
+                if (circle.Name.Equals(selectedTarget))
                 {
                     points++;
                     Update();
@@ -103,45 +112,22 @@ namespace Kinderspiel
 
         public void chooseNewTarget()
         {
-            selectedTarget = targets[random.Next(0, targets.Count)];
-            ColorInfo.Text = ColorName;
-            ColorInfo.Foreground = selectedTarget.GetEllipse().Fill;
+            selectedTarget = targets[random.Next(0, targets.Count)].Name;
+            ColorInfo.Text = selectedTarget;
+
+            foreach (Circle circle in targets)
+            {
+                if (circle.Name == selectedTarget)
+                {
+                    ColorInfo.Foreground = circle.GetEllipse().Fill;
+                    break;
+                }
+            }
         }
 
         private void UpdatePunktestand()
         {
             Punktestand.Text = $"Punkte: {points}";
-        }
-
-        public string ColorName
-        {
-            get {
-                string text = "";
-                if (selectedTarget != null)
-                {
-                    if (selectedTarget.Name().Equals("red"))
-                    {
-                        text += "Rot";
-                    }
-                    else if (selectedTarget.Name().Equals("green"))
-                    {
-                        text += "Grün";
-                    }
-                    else if (selectedTarget.Name().Equals("blue"))
-                    {
-                        text += "Blau";
-                    }
-                    else if (selectedTarget.Name().Equals("purple"))
-                    {
-                        text += "Lila";
-                    }
-                    else if (selectedTarget.Name().Equals("yellow"))
-                    {
-                        text += "Gelb";
-                    }
-                }
-                return text;
-            }
         }
     }
 }

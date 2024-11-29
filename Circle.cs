@@ -1,11 +1,23 @@
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
+using System.Xml.Linq;
 
 namespace Kinderspiel
 {
     public class Circle
     {
+        public static Dictionary<string, string> hexColors = new Dictionary<string, string>()
+        {
+            { "Rot",    "#ff0000" },
+            { "Blau",   "#2200dd" },
+            { "Grün",   "#00aa22" },
+            { "Gelb",   "#ffff00" },
+            { "Lila",   "#81007f" }
+        };
+
         private string _name;
         private Ellipse _ellipse;
         private double _x;
@@ -27,11 +39,10 @@ namespace Kinderspiel
 
             Random random = new Random();
             this._angle = random.Next(0, 360);
-            this._speed = random.Next(1, 100) / 10d;
-            this._radius = 25;
+            this._speed = random.Next(1, 100) / 25d;
+            this._radius = random.Next(30, 40);
             this._x = x;
             this._y = y;
-            this._name = _ellipse.Name;
         }
 
         public void Tick(List<Circle> circles)
@@ -42,11 +53,11 @@ namespace Kinderspiel
 
             if (dx < _radius || dx > GetScreenWidth() - _radius)
             {
-                this._angle = (-(_angle + 180)) % 360;
+                this.Angle = (-(_angle + 180)) % 360;
             }
             if (dy < _radius || dy > GetScreenHeight() - _radius)
             {
-                this._angle = (-_angle) % 360;
+                this.Angle = (-_angle) % 360;
             }
             setLocation(dx, dy);
             CheckCollisions(circles);
@@ -67,20 +78,17 @@ namespace Kinderspiel
                 if (this.Intersects(circle))
                 {
                     double thetaGrad = Math.Atan2(this._y - circle._y, this._x - circle._x) * 180 / Math.PI;
-                    this._angle = (thetaGrad) % 360;
-                    circle._angle = (thetaGrad + 180) % 360;
+                    this.Angle = (thetaGrad) % 360;
+                    circle.Angle = (thetaGrad + 180) % 360;
 
-                    Brush color = this._ellipse.Fill;
-                    this._ellipse.Fill = circle._ellipse.Fill;
-                    circle._ellipse.Fill = color;
+                    string name = this.Name;
+                    this.Name = circle.Name;
+                    circle.Name = name;
 
-                    string name = this._name + "";
-                    this._ellipse.Name = circle._name;
-                    circle._name = name;
-
-                    double sspeed = this._speed;
+                    double speed = this._speed;
                     this._speed = circle._speed;
-                    circle._speed = sspeed;
+                    circle._speed = speed;
+
                     updated = true;
                     break;
                 }
@@ -132,9 +140,27 @@ namespace Kinderspiel
             return _ellipse;
         }
 
-        public string Name()
+        public string Name {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                this._name = value;
+                this._ellipse.Fill = (SolidColorBrush)new BrushConverter().ConvertFrom(hexColors[value]);
+            }
+        }
+
+        private double Angle
         {
-            return _name;
+            set
+            {
+                int cap = 20;
+                Random random = new Random();
+                double a = (value + (random.Next(0, cap) - (cap / 2))) % 360;
+                this._angle = a;
+            }
         }
     }
 }
