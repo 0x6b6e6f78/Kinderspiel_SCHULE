@@ -18,26 +18,30 @@ namespace Kinderspiel
         public MainWindow()
         {
             InitializeComponent();
-            int i = 0;
 
-            InitEllipse(circle1, i++);
-            InitEllipse(circle2, i++);
-            InitEllipse(circle3, i++);
-            InitEllipse(circle4, i++);
-            InitEllipse(circle5, i++);
+            for (int i = 0; i < 5; i++)
+            {
+                InitEllipse(i);
+            }
+
             Update();
             StartMovement();
         }
 
-        private Circle InitEllipse(Ellipse ellipse, int i)
+        private Circle InitEllipse(int i)
         {
             List<string> colors = new List<string>(Circle.hexColors.Keys);
 
             Random random = new Random();
-            Circle circle = new Circle(this, ellipse, (Width / (colors.Count + 1)) * i, random.Next(80, 200));
+            Circle circle = new Circle(this, (Width / (colors.Count + 1)) * (i % colors.Count), random.Next(80, 200));
             circle.Name = colors[i % colors.Count];
 
             targets.Add(circle);
+            MyGrid.Children.Add(circle.GetEllipse());
+            foreach (Ellipse e in circle.GetEllipses())
+            {
+                MyGrid.Children.Add(e);
+            }
             return circle;
         }
 
@@ -64,7 +68,7 @@ namespace Kinderspiel
             chooseNewTarget();
         }
 
-        private void click(object sender, MouseButtonEventArgs e)
+        public void click(object sender, MouseButtonEventArgs e)
         {
             if (selectedTarget == null) return;
             if (!(sender is UIElement))

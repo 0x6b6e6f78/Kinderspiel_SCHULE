@@ -1,3 +1,4 @@
+using System.CodeDom;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -17,11 +18,16 @@ namespace Kinderspiel
 
         private string _name;
         private Ellipse _ellipse;
+        private List<Ellipse> ellipses = new List<Ellipse>();
         private double _x;
         private double _y;
         private double _radius;
         private double _speed;
         private double _angle;
+
+        private Boolean growing = false;
+        private const double RADIUS_MIN = 25;
+        private const double RADIUS_MAX = 35;
 
         private MainWindow window;
 
@@ -29,17 +35,35 @@ namespace Kinderspiel
 
         private Boolean updated = false;
 
-        public Circle(MainWindow window, Ellipse _ellipse, double x, double y)
+        public Circle(MainWindow window, double x, double y)
         {
             this.window = window;
-            this._ellipse = _ellipse;
+
+            this._ellipse = new Ellipse();
+            this._ellipse.VerticalAlignment = VerticalAlignment.Top;
+            this._ellipse.HorizontalAlignment = HorizontalAlignment.Left;
+            this._ellipse.MouseLeftButtonDown += window.click;
 
             Random random = new Random();
             this._angle = random.Next(0, 360);
-            this._speed = random.Next(1, 100) / 25d;
-            this._radius = random.Next(30, 40);
+            this._speed = random.Next(30, 100) / 25d;
+            this._radius = random.Next((int) RADIUS_MIN, (int) RADIUS_MAX);
             this._x = x;
             this._y = y;
+
+            e();
+        }
+
+        private void e()
+        {
+            for (int i = 0; i < 30; i++)
+            {
+                Ellipse ellipse = new Ellipse();
+                ellipse.VerticalAlignment = VerticalAlignment.Top;
+                ellipse.HorizontalAlignment = HorizontalAlignment.Left;
+                ellipse.MouseLeftButtonDown += window.click;
+                ellipses.Add(ellipse);
+            }
         }
 
         public void Tick(List<Circle> circles)
@@ -56,6 +80,24 @@ namespace Kinderspiel
             {
                 this.Angle = (-_angle) % 360;
             }
+
+            double factor = .02 * _speed;
+            if (growing)
+            {
+                _radius += factor;
+                if (_radius >= RADIUS_MAX)
+                {
+                    growing = false;
+                }
+            } else
+            {
+                _radius -= factor;
+                if (_radius <= RADIUS_MIN)
+                {
+                    growing = true;
+                }
+            }
+
             setLocation(dx, dy);
             CheckCollisions(circles);
         }
@@ -98,6 +140,28 @@ namespace Kinderspiel
             _ellipse.Margin = thickness;
             _ellipse.Width = _radius * 2;
             _ellipse.Height = _radius * 2;
+
+            for (int i = 0; i < ellipses.Count; i++)
+            {
+                double off = (_radius / ellipses.Count * i);
+
+                Ellipse ellipse = ellipses[i];
+                Thickness t = new Thickness(_x + off - _radius, _y + off - _radius + HeaderOffset, 0, 0);
+                ellipse.Margin = t;
+                ellipse.Width = Math.Max(0, (_radius - off * 2) * 2);
+                ellipse.Height = Math.Max((_radius - off * 2) * 2, 0);
+
+                int c = Convert.ToInt32(hexColors[Name].Substring(1), 16);
+                int r = (c >> 16) & 255;
+                int g = (c >> 8) & 255;
+                int b = (c) & 255;
+
+                r = (((255 - r) / (ellipses.Count + 1)) * (i + 1)) + r;
+                g = (((255 - g) / (ellipses.Count + 1)) * (i + 1)) + g;
+                b = (((255 - b) / (ellipses.Count + 1)) * (i + 1)) + b;
+                ellipse.Fill = new SolidColorBrush(Color.FromArgb((byte)(100 / ellipses.Count * (ellipses.Count - i) + 150), (byte)r, (byte)g, (byte)b));
+            }
+
             updated = false;
         }
 
@@ -135,6 +199,11 @@ namespace Kinderspiel
         public Ellipse GetEllipse()
         {
             return _ellipse;
+        }
+
+        public List<Ellipse> GetEllipses()
+        {
+            return ellipses;
         }
 
         public string Name {
