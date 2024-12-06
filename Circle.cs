@@ -46,15 +46,15 @@ namespace Kinderspiel
 
             Random random = new Random();
             this._angle = random.Next(0, 360);
-            this._speed = random.Next(30, 100) / 25d;
+            this._speed = random.Next(30, 100) / 45d;
             this._radius = random.Next((int) RADIUS_MIN, (int) RADIUS_MAX);
             this._x = x;
             this._y = y;
 
-            e();
+            createShading();
         }
 
-        private void e()
+        private void createShading()
         {
             for (int i = 0; i < 30; i++)
             {
@@ -81,7 +81,7 @@ namespace Kinderspiel
                 this.Angle = (-_angle) % 360;
             }
 
-            double factor = .02 * _speed;
+            double factor = .01 * _speed;
             if (growing)
             {
                 _radius += factor;

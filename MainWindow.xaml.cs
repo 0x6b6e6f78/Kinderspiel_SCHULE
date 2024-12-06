@@ -58,7 +58,7 @@ namespace Kinderspiel
                     circle.Update();
                 }
 
-                await Task.Delay(16);
+                await Task.Delay(10);
              }
          }
 
@@ -84,6 +84,13 @@ namespace Kinderspiel
                     if (circle1.GetEllipse() == ellipse)
                     {
                         circle = circle1; break;
+                    }
+                    foreach (Ellipse ellipse1 in circle1.GetEllipses())
+                    {
+                        if (ellipse1 == ellipse)
+                        {
+                            circle = circle1; break;
+                        }
                     }
                 }
                 if (circle == null)
